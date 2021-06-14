@@ -6,3 +6,8 @@ project(ngine
 set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(modules)
+
+if(BUILD_TESTING)
+    enable_testing()
+    add_subdirectory(tests)
+endif()

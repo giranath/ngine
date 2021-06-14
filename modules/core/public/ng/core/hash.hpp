@@ -18,7 +18,7 @@ namespace ng
  * @note FNV-1a implementation
  */
 template<typename It>
-constexpr uint64_t hash(It begin, It end) noexcept
+[[nodiscard]] constexpr uint64_t hash(It begin, It end) noexcept
 {
     using iterator_value_type = typename std::iterator_traits<It>::value_type;
     static_assert(std::is_convertible_v<iterator_value_type, uint8_t>, "Iterator must be on bytes");
@@ -42,7 +42,7 @@ constexpr uint64_t hash(It begin, It end) noexcept
  * @param str The string to hash
  * @return The hash value of the string
  */
-constexpr uint64_t hash(std::string_view str) noexcept
+[[nodiscard]] constexpr uint64_t hash(std::string_view str) noexcept
 {
     return hash(str.begin(), str.end());
 }
@@ -53,7 +53,7 @@ constexpr uint64_t hash(std::string_view str) noexcept
  * @param size The size of the memory block
  * @return The hash value for this memory block
  */
-uint64_t hash(const void* memory, std::size_t size) noexcept;
+[[nodiscard]] uint64_t hash(const void* memory, std::size_t size) noexcept;
 
 namespace literals
 {
@@ -64,7 +64,7 @@ namespace literals
  * @param length The length of the string to hash
  * @return The hashed value of the string
  */
-constexpr uint64_t operator ""_h(const char* str, std::size_t length)
+[[nodiscard]] constexpr uint64_t operator ""_h(const char* str, std::size_t length)
 {
     return hash(std::string_view{str, length});
 }
