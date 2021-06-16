@@ -5,6 +5,7 @@ project(ngine
 
 set(CMAKE_CXX_STANDARD 17)
 
+add_subdirectory(thirdparties)
 add_subdirectory(modules)
 
 if(BUILD_TESTING)
