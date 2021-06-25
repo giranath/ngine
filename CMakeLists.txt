@@ -5,6 +5,8 @@ project(ngine
 
 set(CMAKE_CXX_STANDARD 17)
 
+find_package(glm REQUIRED)
+
 add_subdirectory(thirdparties)
 add_subdirectory(modules)
 add_subdirectory(application)
