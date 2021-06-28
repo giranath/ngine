@@ -2,7 +2,8 @@ add_executable(unit-tests
         main.cpp
         core/hash.cpp
         core/name.cpp
-        core/transform2d.cpp)
+        core/transform2d.cpp
+        core/memory_pool.cpp)
 
 target_include_directories(unit-tests
         PRIVATE catch)
