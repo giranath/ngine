@@ -7,6 +7,8 @@ add_library(gameplay
         private/node_tree.cpp
         public/ng/gameplay/node2d.hpp
         private/node2d.cpp
+        public/ng/gameplay/node_path.hpp
+        private/node_path.cpp
         )
 
 target_include_directories(gameplay
