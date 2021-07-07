@@ -21,8 +21,8 @@ class node2d : public node
     [[nodiscard]] transform2d parent_transform() const noexcept;
 
 public:
-    explicit node2d(safe_name name, node* parent = nullptr, node_tree* owner = nullptr) noexcept;
-    node2d(safe_name name, transform2d transform,  node* parent = nullptr, node_tree* owner = nullptr) noexcept;
+    explicit node2d(safe_name name, node* parent = nullptr) noexcept;
+    node2d(safe_name name, transform2d transform,  node* parent = nullptr) noexcept;
 
     /**
      * Returns the world transform of this node

@@ -6,14 +6,28 @@
 namespace ng
 {
 
-node::node(safe_name name, node* parent, node_tree* owner) noexcept
+void node::set_owner(node_tree* owner)
+{
+    owner_ = owner;
+
+    for(auto& child : children_)
+    {
+        child->set_owner(owner);
+    }
+}
+
+node::node(safe_name name, node* parent) noexcept
 : name_{std::move(name)}
-, owner_{owner}
-, parent_{parent}
+// A node is owned by the same tree as its parent
+, owner_{nullptr}
+, parent_{nullptr}
 , children_()
 , decorators_()
 {
-
+    if(parent)
+    {
+        parent->attach_child(this);
+    }
 }
 
 const safe_name& node::name() const noexcept
@@ -52,7 +66,7 @@ void node::detach_child(node* child)
 
     for(std::size_t i = 0; i < children_.size(); ++i)
     {
-        if(children_[i].get() == child)
+        if(children_[i] == child)
         {
             // Make sure the children doesn't reference this node
             child->parent_ = nullptr;
@@ -67,9 +81,12 @@ void node::attach_child(node* child)
 {
     assert(child);
 
-    // Keep a reference on the child, because if we remove it from it's parent,
-    // it will be destroyed
-    strong_node_ptr strong_child = child->shared_from_this();
+    // If this node already has a child with the same name as the new node to add
+    // we cannot proceed further
+    if(std::any_of(children_.begin(), children_.end(), [child](const node* child_node) { return child_node->name() == child->name(); }))
+    {
+        throw invalid_node_name{child->name()};
+    }
 
     // Make sure to detach child from it's parent before attaching it to a new node
     if(node* current_parent = child->parent_)
@@ -87,23 +104,23 @@ void node::attach_child(node* child)
     }
 
     // At this point, child is ready to be attached to this
-    strong_child->parent_ = this;
-    children_.push_back(strong_child);
+    child->parent_ = this;
+    children_.push_back(child);
 }
 
 bool node::has_child(const node* child) const noexcept
 {
     assert(child);
 
-    return std::any_of(children_.begin(), children_.end(), [child](const strong_node_ptr& child_strong_ptr)
+    return std::any_of(children_.begin(), children_.end(), [child](const node* child_strong_ptr)
     {
-        return child_strong_ptr.get() == child;
+        return child_strong_ptr == child;
     });
 }
 
 node* node::find_child(const safe_name& name) noexcept
 {
-    auto it = std::find_if(children_.begin(), children_.end(), [&name](const strong_node_ptr& child_strong_ptr)
+    auto it = std::find_if(children_.begin(), children_.end(), [&name](const node* child_strong_ptr)
     {
        return child_strong_ptr->name() == name;
     });
@@ -114,13 +131,13 @@ node* node::find_child(const safe_name& name) noexcept
     }
     else
     {
-        return it->get();
+        return *it;
     }
 }
 
 const node* node::find_child(const safe_name& name) const noexcept
 {
-    auto it = std::find_if(children_.begin(), children_.end(), [&name](const strong_node_ptr& child_strong_ptr)
+    auto it = std::find_if(children_.begin(), children_.end(), [&name](const node* child_strong_ptr)
     {
         return child_strong_ptr->name() == name;
     });
@@ -131,7 +148,7 @@ const node* node::find_child(const safe_name& name) const noexcept
     }
     else
     {
-        return it->get();
+        return *it;
     }
 }
 
@@ -157,7 +174,7 @@ bool node::in_hierarchy(const node* parent) const noexcept
 
 bool node::root() const noexcept
 {
-    return parent_;
+    return parent_ == nullptr;
 }
 
 bool node::leaf() const noexcept
@@ -170,9 +187,134 @@ primary_node_types node::primary_node_type() const noexcept
     return primary_node_types::node;
 }
 
+node* node::parent() noexcept
+{
+    return parent_;
+}
+
 const node* node::parent() const noexcept
 {
     return parent_;
+}
+
+node* node::first_child() noexcept
+{
+    if(!children_.empty())
+    {
+        return children_.front();
+    }
+
+    return nullptr;
+}
+
+const node* node::first_child() const noexcept
+{
+    if(!children_.empty())
+    {
+        return children_.front();
+    }
+
+    return nullptr;
+}
+
+node* node::last_child() noexcept
+{
+    if(!children_.empty())
+    {
+        return children_.back();
+    }
+
+    return nullptr;
+}
+
+const node* node::last_child() const noexcept
+{
+    if(!children_.empty())
+    {
+        return children_.back();
+    }
+
+    return nullptr;
+}
+
+node* node::next_sibling() noexcept
+{
+    if(parent_)
+    {
+        auto it = std::find(parent_->children_.begin(), parent_->children_.end(), this);
+
+        if(it != parent_->children_.end())
+        {
+            const std::size_t index = std::distance(parent_->children_.begin(), it);
+
+            if(index < parent_->children_.size() - 1)
+            {
+                return parent_->children_[index + 1];
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+const node* node::next_sibling() const noexcept
+{
+    if(parent_)
+    {
+        auto it = std::find(parent_->children_.begin(), parent_->children_.end(), this);
+
+        if(it != parent_->children_.end())
+        {
+            const std::size_t index = std::distance(parent_->children_.begin(), it);
+
+            if(index < parent_->children_.size() - 1)
+            {
+                return parent_->children_[index + 1];
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+node* node::previous_sibling() noexcept
+{
+    if(parent_)
+    {
+        auto it = std::find(parent_->children_.begin(), parent_->children_.end(), this);
+
+        if(it != parent_->children_.end())
+        {
+            const std::size_t index = std::distance(parent_->children_.begin(), it);
+
+            if(index > 0)
+            {
+                return parent_->children_[index - 1];
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+const node* node::previous_sibling() const noexcept
+{
+    if(parent_)
+    {
+        auto it = std::find(parent_->children_.begin(), parent_->children_.end(), this);
+
+        if(it != parent_->children_.end())
+        {
+            const std::size_t index = std::distance(parent_->children_.begin(), it);
+
+            if(index > 0)
+            {
+                return parent_->children_[index - 1];
+            }
+        }
+    }
+
+    return nullptr;
 }
 
 }

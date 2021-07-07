@@ -5,18 +5,35 @@
 
 #include <memory>
 #include <vector>
+#include <stdexcept>
 
 namespace ng
 {
 
 class node;
-using weak_node_ptr = std::weak_ptr<node>;
-using strong_node_ptr = std::shared_ptr<node>;
 
 class node_decorator;
 using node_decorator_ptr = std::unique_ptr<node_decorator>;
 
 class node_tree;
+
+class invalid_node_name : public std::runtime_error
+{
+    safe_name name_;
+
+public:
+    explicit invalid_node_name(safe_name name)
+    : std::runtime_error("invalid node name")
+    , name_{name}
+    {
+
+    }
+
+    [[nodiscard]] inline safe_name name() const noexcept
+    {
+        return name_;
+    }
+};
 
 /**
  * Decorator that can be attached to a node to change it's behaviour
@@ -25,7 +42,7 @@ class node_tree;
  */
 class node_decorator : std::enable_shared_from_this<node>
 {
-    weak_node_ptr node_;
+    node* node_;
 public:
     virtual ~node_decorator() = default;
 };
@@ -60,13 +77,15 @@ class node : std::enable_shared_from_this<node>
     node* parent_;
 
     // List of child nodes
-    std::vector<strong_node_ptr> children_;
+    std::vector<node*> children_;
 
     // List of decorators attached to this node to update it's behaviour
     std::vector<node_decorator_ptr> decorators_;
 
+    void set_owner(node_tree* owner);
+
 public:
-    explicit node(safe_name name, node* parent = nullptr, node_tree* owner = nullptr) noexcept;
+    explicit node(safe_name name, node* parent = nullptr) noexcept;
     virtual ~node() = default;
 
     /**
@@ -169,7 +188,27 @@ public:
      * Returns the parent node
      * @return The parent node
      */
+    [[nodiscard]] node* parent() noexcept;
     [[nodiscard]] const node* parent() const noexcept;
+
+    [[nodiscard]] node* first_child() noexcept;
+    [[nodiscard]] const node* first_child() const noexcept;
+    [[nodiscard]] node* last_child() noexcept;
+    [[nodiscard]] const node* last_child() const noexcept;
+
+    /**
+     * Get the next sibling
+     * @return The next sibling
+     */
+    [[nodiscard]] node* next_sibling() noexcept;
+    [[nodiscard]] const node* next_sibling() const noexcept;
+
+    /**
+     * Returns the previous sibling
+     * @return the previous sibling
+     */
+    [[nodiscard]] node* previous_sibling() noexcept;
+    [[nodiscard]] const node* previous_sibling() const noexcept;
 };
 
 }

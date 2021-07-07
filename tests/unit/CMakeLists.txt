@@ -5,7 +5,9 @@ add_executable(unit-tests
         core/transform2d.cpp
         core/memory_pool.cpp
         deser/xml_loader.cpp
-        gameplay/node2d.cpp)
+        gameplay/node2d.cpp
+        gameplay/node_path.cpp
+        gameplay/node_tree.cpp)
 
 target_include_directories(unit-tests
         PRIVATE catch)
