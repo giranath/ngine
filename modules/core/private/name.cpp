@@ -5,6 +5,8 @@
 namespace ng
 {
 
+const name name::none{};
+
 name::name(std::string_view string)
 : entry_(string.empty() ? nullptr : name_table::get().find_or_add(string))
 {

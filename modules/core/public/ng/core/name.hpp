@@ -16,6 +16,8 @@ class name
 {
     name_table_entry* entry_;
 public:
+    static const name none;
+
     constexpr name() noexcept
     : entry_{nullptr}
     {
