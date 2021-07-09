@@ -1,4 +1,5 @@
 #include "catch.hpp"
+#include <ng/core/hash.hpp>
 #include <ng/core/name.hpp>
 
 static const char* known_hash_collisions[2] = {
@@ -19,23 +20,9 @@ TEST_CASE("A name should safely handle hash collisions", "[name]" ) {
     REQUIRE_FALSE(name_1 == name_2);
 }
 
-TEST_CASE("A name with hash collision safety disabled will not handle hash collisions", "[name]" ) {
-    const ng::name<ng::hash_collision_unsafe> name_1{known_hash_collisions[0]};
-    const ng::name<ng::hash_collision_unsafe> name_2{known_hash_collisions[1]};
-
-    REQUIRE(name_1 == name_2);
-}
-
 TEST_CASE("An inline name should safely handle hash collisions", "[name]" ) {
-    const ng::inline_name<21> name_1{known_hash_collisions[0]};
-    const ng::inline_name<21> name_2{known_hash_collisions[1]};
+    const ng::name name_1{known_hash_collisions[0]};
+    const ng::name name_2{known_hash_collisions[1]};
 
     REQUIRE_FALSE(name_1 == name_2);
-}
-
-TEST_CASE("An inline name with hash collision safety disabled will not handle hash collisions", "[name]" ) {
-    const ng::inline_name<21, ng::hash_collision_unsafe> name_1{known_hash_collisions[0]};
-    const ng::inline_name<21, ng::hash_collision_unsafe> name_2{known_hash_collisions[1]};
-
-    REQUIRE(name_1 == name_2);
 }
