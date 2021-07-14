@@ -1,7 +1,7 @@
 #ifndef NGINE_GAMEPLAY_NODE_HPP
 #define NGINE_GAMEPLAY_NODE_HPP
 
-#include <ng/core/name.hpp>
+#include <ng/core/string_name.hpp>
 
 #include <memory>
 #include <vector>
@@ -19,17 +19,17 @@ class node_tree;
 
 class invalid_node_name : public std::runtime_error
 {
-    safe_name name_;
+    string_name name_;
 
 public:
-    explicit invalid_node_name(safe_name name)
+    explicit invalid_node_name(string_name name)
     : std::runtime_error("invalid node name")
     , name_{name}
     {
 
     }
 
-    [[nodiscard]] inline safe_name name() const noexcept
+    [[nodiscard]] inline string_name name() const noexcept
     {
         return name_;
     }
@@ -68,7 +68,7 @@ class node : std::enable_shared_from_this<node>
     friend node_tree;
 
     // The name of the node
-    safe_name name_;
+    string_name name_;
 
     // The tree owning this node
     node_tree* owner_;
@@ -85,14 +85,14 @@ class node : std::enable_shared_from_this<node>
     void set_owner(node_tree* owner);
 
 public:
-    explicit node(safe_name name, node* parent = nullptr) noexcept;
+    explicit node(string_name name, node* parent = nullptr) noexcept;
     virtual ~node() = default;
 
     /**
      * Returns the name of this node
      * @return The name of this node
      */
-    const safe_name& name() const noexcept;
+    const string_name& name() const noexcept;
 
     /**
      * Add a decorator to the node
@@ -155,8 +155,8 @@ public:
      * @param name The name of the child node
      * @return the found node or nullptr if it was not found
      */
-    [[nodiscard]] node* find_child(const safe_name& name) noexcept;
-    [[nodiscard]] const node* find_child(const safe_name& name) const noexcept;
+    [[nodiscard]] node* find_child(const string_name& name) noexcept;
+    [[nodiscard]] const node* find_child(const string_name& name) const noexcept;
 
     /**
      * Check if this node is under the hierarchy of a parent node

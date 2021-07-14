@@ -16,7 +16,7 @@ transform2d node2d::parent_transform() const noexcept
     return transform2d{};
 }
 
-node2d::node2d(safe_name name, node* parent) noexcept
+node2d::node2d(string_name name, node* parent) noexcept
 : node{std::move(name), parent}
 , local_()
 , world_()
@@ -24,7 +24,7 @@ node2d::node2d(safe_name name, node* parent) noexcept
 
 }
 
-node2d::node2d(safe_name name, transform2d transform, node* parent) noexcept
+node2d::node2d(string_name name, transform2d transform, node* parent) noexcept
 : node2d(std::move(name), parent)
 {
     set_local_transform(transform);

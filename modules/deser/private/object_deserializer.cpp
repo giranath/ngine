@@ -4,7 +4,7 @@
 namespace ng
 {
 
-std::optional<uint8_t> object_deserializer::deserialize_uint8(const ng::name& name, uint8_t def) const
+std::optional<uint8_t> object_deserializer::deserialize_uint8(const ng::string_name& name, uint8_t def) const
 {
     const auto temp_value = deserialize_uint64(name, def);
 
@@ -17,7 +17,7 @@ std::optional<uint8_t> object_deserializer::deserialize_uint8(const ng::name& na
     return static_cast<uint8_t>(*temp_value);
 }
 
-std::optional<uint16_t> object_deserializer::deserialize_uint16(const ng::name& name, uint16_t def) const
+std::optional<uint16_t> object_deserializer::deserialize_uint16(const ng::string_name& name, uint16_t def) const
 {
     const auto temp_value = deserialize_uint64(name, def);
 
@@ -31,7 +31,7 @@ std::optional<uint16_t> object_deserializer::deserialize_uint16(const ng::name& 
 }
 
 
-std::optional<uint32_t> object_deserializer::deserialize_uint32(const ng::name& name, uint32_t def) const
+std::optional<uint32_t> object_deserializer::deserialize_uint32(const ng::string_name& name, uint32_t def) const
 {
     const auto temp_value = deserialize_uint64(name, def);
 
@@ -44,7 +44,7 @@ std::optional<uint32_t> object_deserializer::deserialize_uint32(const ng::name& 
     return static_cast<uint32_t>(*temp_value);
 }
 
-std::optional<int8_t> object_deserializer::deserialize_int8(const ng::name& name, int8_t def) const
+std::optional<int8_t> object_deserializer::deserialize_int8(const ng::string_name& name, int8_t def) const
 {
     const auto temp_value = deserialize_int64(name, def);
 
@@ -58,7 +58,7 @@ std::optional<int8_t> object_deserializer::deserialize_int8(const ng::name& name
     return static_cast<int8_t>(*temp_value);
 }
 
-std::optional<int16_t> object_deserializer::deserialize_int16(const ng::name& name, int16_t def) const
+std::optional<int16_t> object_deserializer::deserialize_int16(const ng::string_name& name, int16_t def) const
 {
     const auto temp_value = deserialize_int64(name, def);
 
@@ -73,7 +73,7 @@ std::optional<int16_t> object_deserializer::deserialize_int16(const ng::name& na
 }
 
 
-std::optional<int32_t> object_deserializer::deserialize_int32(const ng::name& name, int32_t def) const
+std::optional<int32_t> object_deserializer::deserialize_int32(const ng::string_name& name, int32_t def) const
 {
     const auto temp_value = deserialize_int64(name, def);
 
@@ -87,7 +87,7 @@ std::optional<int32_t> object_deserializer::deserialize_int32(const ng::name& na
     return static_cast<int32_t>(*temp_value);
 }
 
-std::optional<float> object_deserializer::deserialize_float(const ng::name& name, float def) const
+std::optional<float> object_deserializer::deserialize_float(const ng::string_name& name, float def) const
 {
     const auto temp_value = deserialize_double(name, def);
 

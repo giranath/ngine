@@ -221,7 +221,7 @@ node* node_tree::find(const node_path& path) const noexcept
     }
 
     // We iterate over each parts of the name
-    for(const safe_name& name : path)
+    for(const string_name& name : path)
     {
         if(current == nullptr && root_->name() == name)
         {

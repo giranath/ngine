@@ -12,36 +12,36 @@ class name_table_entry;
  * Represent a name, a string optimized for comparison
  * Names should be used to identify stuff with a string because they comparing names together is a O(1) operation
  */
-class name
+class string_name
 {
     name_table_entry* entry_;
 public:
-    static const name none;
+    static const string_name none;
 
-    constexpr name() noexcept
+    constexpr string_name() noexcept
     : entry_{nullptr}
     {
 
     }
 
-    explicit name(std::string_view string);
-    name(const name& other);
-    name(name&& other) noexcept;
-    ~name();
+    explicit string_name(std::string_view string);
+    string_name(const string_name& other);
+    string_name(string_name&& other) noexcept;
+    ~string_name();
 
     /**
      * Copy a name into this name
      * @param other The name to copy into this
      * @return a reference to this
      */
-    name& operator=(const name& other);
-    name& operator=(name&& other) noexcept;
+    string_name& operator=(const string_name& other);
+    string_name& operator=(string_name&& other) noexcept;
 
     /**
      * Swap the name with another
      * @param other The other name
      */
-    void swap(name& other) noexcept;
+    void swap(string_name& other) noexcept;
 
     /**
      * Clear the name
@@ -66,24 +66,21 @@ public:
      */
     [[nodiscard]] std::string string() const noexcept;
 
-    bool operator==(const name& other) const noexcept;
-    bool operator!=(const name& other) const noexcept;
+    bool operator==(const string_name& other) const noexcept;
+    bool operator!=(const string_name& other) const noexcept;
 };
 
-void swap(name& a, name& b) noexcept;
+void swap(string_name& a, string_name& b) noexcept;
 
 namespace literals
 {
 
-inline name operator""_name(const char* str, std::size_t len)
+inline string_name operator""_name(const char* str, std::size_t len)
 {
-    return name{std::string_view{str, len}};
+    return string_name{std::string_view{str, len}};
 }
 
 }
-
-using safe_name = name;
-using unsafe_name = name;
 
 }
 

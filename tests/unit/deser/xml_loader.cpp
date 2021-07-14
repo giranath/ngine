@@ -60,9 +60,9 @@ TEST_CASE("An object can be loaded from an XML source", "[xml_loader]")
             for(std::size_t i = 0; i < size; ++i)
             {
                 archiver->set_index(i);
-                const ng::name key = archiver->name();
+                const ng::string_name key = archiver->name();
 
-                const auto value = archiver->deserialize_string(ng::name::none);
+                const auto value = archiver->deserialize_string(ng::string_name::none);
 
                 dictionary[key.string()] = *value;
             }
@@ -92,7 +92,7 @@ TEST_CASE("An object can be loaded from an XML source", "[xml_loader]")
             for (std::size_t i = 0; i < size; ++i)
             {
                 archiver->set_index(i);
-                array[i] = *archiver->deserialize_int32(ng::name::none);
+                array[i] = *archiver->deserialize_int32(ng::string_name::none);
             }
 
             const std::vector<int> expected_array{10, 13};

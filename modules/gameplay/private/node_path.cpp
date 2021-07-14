@@ -25,20 +25,20 @@ node_path node_path::normalize() const
 
     // 1. Remove empty names
     {
-        auto it = std::remove(normalized_path.names_.begin(), normalized_path.names_.end(), safe_name{});
+        auto it = std::remove(normalized_path.names_.begin(), normalized_path.names_.end(), string_name{});
         normalized_path.names_.erase(it, normalized_path.names_.end());
     }
 
 
     // 2. Resolve dots
     {
-        auto it = std::remove(normalized_path.names_.begin(), normalized_path.names_.end(), safe_name{"."});
+        auto it = std::remove(normalized_path.names_.begin(), normalized_path.names_.end(), string_name{"."});
         normalized_path.names_.erase(it, normalized_path.names_.end());
     }
 
     // /hello/../world
 
-    static const safe_name parent_node{".."};
+    static const string_name parent_node{".."};
 
     // 3. Resolve dot-dot
     for(int64_t i = normalized_path.names_.size() - 2; i >= 0; --i)
@@ -72,7 +72,7 @@ node_path node_path::append(const node_path& path) const
     else
     {
         node_path new_path = *this;
-        for(const safe_name& name : path.names_)
+        for(const string_name& name : path.names_)
         {
             new_path.names_.push_back(name);
         }
@@ -135,7 +135,7 @@ std::string node_path::string() const
         stream << delimiter_char;
     }
 
-    for(const safe_name& name : names_)
+    for(const string_name& name : names_)
     {
         stream << name.c_str() << delimiter_char;
     }
@@ -283,7 +283,7 @@ bool node_path_iterator::operator!=(const node_path_iterator& other) const noexc
         || index_ != other.index_;
 }
 
-const safe_name& node_path_iterator::operator*() const noexcept
+const string_name& node_path_iterator::operator*() const noexcept
 {
     assert(owner_);
     assert(index_ < owner_->names_.size());

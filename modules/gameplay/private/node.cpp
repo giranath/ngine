@@ -16,7 +16,7 @@ void node::set_owner(node_tree* owner)
     }
 }
 
-node::node(safe_name name, node* parent) noexcept
+node::node(string_name name, node* parent) noexcept
 : name_{std::move(name)}
 // A node is owned by the same tree as its parent
 , owner_{nullptr}
@@ -30,7 +30,7 @@ node::node(safe_name name, node* parent) noexcept
     }
 }
 
-const safe_name& node::name() const noexcept
+const string_name& node::name() const noexcept
 {
     return name_;
 }
@@ -118,7 +118,7 @@ bool node::has_child(const node* child) const noexcept
     });
 }
 
-node* node::find_child(const safe_name& name) noexcept
+node* node::find_child(const string_name& name) noexcept
 {
     auto it = std::find_if(children_.begin(), children_.end(), [&name](const node* child_strong_ptr)
     {
@@ -135,7 +135,7 @@ node* node::find_child(const safe_name& name) noexcept
     }
 }
 
-const node* node::find_child(const safe_name& name) const noexcept
+const node* node::find_child(const string_name& name) const noexcept
 {
     auto it = std::find_if(children_.begin(), children_.end(), [&name](const node* child_strong_ptr)
     {

@@ -1,18 +1,18 @@
-#include "name.hpp"
+#include "string_name.hpp"
 #include "name_table.hpp"
 #include <utility>
 
 namespace ng
 {
 
-const name name::none{};
+const string_name string_name::none{};
 
-name::name(std::string_view string)
+string_name::string_name(std::string_view string)
 : entry_(string.empty() ? nullptr : name_table::get().find_or_add(string))
 {
 }
 
-name::name(const name& other)
+string_name::string_name(const string_name& other)
 : entry_{other.entry_}
 {
     if(entry_)
@@ -21,18 +21,18 @@ name::name(const name& other)
     }
 }
 
-name::name(name&& other) noexcept
+string_name::string_name(string_name&& other) noexcept
 : entry_{std::exchange(other.entry_, nullptr)}
 {
 
 }
 
-name::~name()
+string_name::~string_name()
 {
     name_table::get().release(entry_);
 }
 
-name& name::operator=(const name& other)
+string_name& string_name::operator=(const string_name& other)
 {
     if(&other != this)
     {
@@ -48,7 +48,7 @@ name& name::operator=(const name& other)
     return *this;
 }
 
-name& name::operator=(name&& other) noexcept
+string_name& string_name::operator=(string_name&& other) noexcept
 {
     if(&other != this)
     {
@@ -60,45 +60,45 @@ name& name::operator=(name&& other) noexcept
     return *this;
 }
 
-void name::swap(name& other) noexcept
+void string_name::swap(string_name& other) noexcept
 {
     using std::swap;
 
     swap(entry_, other.entry_);
 }
 
-void name::clear()
+void string_name::clear()
 {
     name_table::get().release(entry_);
     entry_ = nullptr;
 }
 
-bool name::empty() const noexcept
+bool string_name::empty() const noexcept
 {
     return entry_ == nullptr;
 }
 
-const char* name::c_str() const noexcept
+const char* string_name::c_str() const noexcept
 {
     return entry_ ? entry_->c_str() : nullptr;
 }
 
-std::string name::string() const noexcept
+std::string string_name::string() const noexcept
 {
     return entry_ ? entry_->string() : std::string{};
 }
 
-bool name::operator==(const name& other) const noexcept
+bool string_name::operator==(const string_name& other) const noexcept
 {
     return entry_ == other.entry_;
 }
 
-bool name::operator!=(const name& other) const noexcept
+bool string_name::operator!=(const string_name& other) const noexcept
 {
     return entry_ != other.entry_;
 }
 
-void swap(name& a, name& b) noexcept
+void swap(string_name& a, string_name& b) noexcept
 {
     a.swap(b);
 }

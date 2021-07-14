@@ -2,8 +2,8 @@ add_library(core
         private/hash.cpp
         public/ng/core/hash.hpp
         public/ng/core/time.hpp
-        public/ng/core/name.hpp
-        private/name.cpp
+        public/ng/core/string_name.hpp
+        private/string_name.cpp
         private/name_table.hpp
         private/name_table.cpp
         public/ng/core/transform2d.hpp

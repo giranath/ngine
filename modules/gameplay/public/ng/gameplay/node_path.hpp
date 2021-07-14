@@ -1,7 +1,7 @@
 #ifndef NGINE_GAMEPLAY_NODE_PATH_HPP
 #define NGINE_GAMEPLAY_NODE_PATH_HPP
 
-#include <ng/core/name.hpp>
+#include <ng/core/string_name.hpp>
 
 #include <string_view>
 #include <string>
@@ -25,9 +25,9 @@ class node_path_iterator
 public:
     using iterator_category = std::bidirectional_iterator_tag;
     using difference_type   = std::ptrdiff_t;
-    using value_type        = safe_name;
-    using pointer           = const safe_name*;  // or also value_type*
-    using reference         = const safe_name&;  // or also value_type&
+    using value_type        = string_name;
+    using pointer           = const string_name*;  // or also value_type*
+    using reference         = const string_name&;  // or also value_type&
 
     node_path_iterator();
 
@@ -72,7 +72,7 @@ private:
 class node_path
 {
     friend node_path_iterator;
-    std::vector<safe_name> names_;
+    std::vector<string_name> names_;
     bool absolute_;
     bool trailing_delimiter_;
 public:

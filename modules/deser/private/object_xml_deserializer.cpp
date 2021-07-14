@@ -29,7 +29,7 @@ const object_xml_deserializer::state& object_xml_deserializer::current_state() c
     return states_.back();
 }
 
-pugi::xml_node object_xml_deserializer::find_property_node(const ng::name& name) const
+pugi::xml_node object_xml_deserializer::find_property_node(const ng::string_name& name) const
 {
     const state& s = current_state();
 
@@ -37,7 +37,7 @@ pugi::xml_node object_xml_deserializer::find_property_node(const ng::name& name)
     switch(s.mode)
     {
     case loading_modes::object:
-        if(name == name::none)
+        if(name == string_name::none)
         {
             return find_nth_child_node(s.index, "field");
         }
@@ -48,7 +48,7 @@ pugi::xml_node object_xml_deserializer::find_property_node(const ng::name& name)
     case loading_modes::array:
         return find_nth_child_node(s.index, "entry");
     case loading_modes::dictionary:
-        if(name == name::none)
+        if(name == string_name::none)
         {
             return find_nth_child_node(s.index, "entry");
         }
@@ -183,7 +183,7 @@ std::size_t object_xml_deserializer::index() const
     return s.index;
 }
 
-name object_xml_deserializer::name() const
+string_name object_xml_deserializer::name() const
 {
     const state& s = current_state();
 
@@ -195,14 +195,14 @@ name object_xml_deserializer::name() const
         nth_child = find_nth_child_node(s.index, "field");
         name_attribute = nth_child.attribute("name");
 
-        return ng::name{name_attribute.as_string()};
+        return ng::string_name{name_attribute.as_string()};
     case loading_modes::dictionary:
         nth_child = find_nth_child_node(s.index, "entry");
         name_attribute = nth_child.attribute("key");
 
-        return ng::name{name_attribute.as_string()};
+        return ng::string_name{name_attribute.as_string()};
     default:
-        return name::none;
+        return string_name::none;
     }
 }
 
@@ -213,7 +213,7 @@ uint8_t object_xml_deserializer::version() const
     return s.version;
 }
 
-std::optional<uint64_t> object_xml_deserializer::deserialize_uint64(const ng::name& name, uint64_t def) const
+std::optional<uint64_t> object_xml_deserializer::deserialize_uint64(const ng::string_name& name, uint64_t def) const
 {
     pugi::xml_node next_node = find_property_node(name);
 
@@ -227,7 +227,7 @@ std::optional<uint64_t> object_xml_deserializer::deserialize_uint64(const ng::na
     return std::nullopt;
 }
 
-std::optional<int64_t> object_xml_deserializer::deserialize_int64(const ng::name& name, int64_t def) const
+std::optional<int64_t> object_xml_deserializer::deserialize_int64(const ng::string_name& name, int64_t def) const
 {
     pugi::xml_node next_node = find_property_node(name);
 
@@ -241,7 +241,7 @@ std::optional<int64_t> object_xml_deserializer::deserialize_int64(const ng::name
     return std::nullopt;
 }
 
-std::optional<bool> object_xml_deserializer::deserialize_bool(const ng::name& name, bool def) const
+std::optional<bool> object_xml_deserializer::deserialize_bool(const ng::string_name& name, bool def) const
 {
     pugi::xml_node next_node = find_property_node(name);
 
@@ -255,7 +255,7 @@ std::optional<bool> object_xml_deserializer::deserialize_bool(const ng::name& na
     return std::nullopt;
 }
 
-std::optional<double> object_xml_deserializer::deserialize_double(const ng::name& name, double def) const
+std::optional<double> object_xml_deserializer::deserialize_double(const ng::string_name& name, double def) const
 {
     pugi::xml_node next_node = find_property_node(name);
 
@@ -269,7 +269,7 @@ std::optional<double> object_xml_deserializer::deserialize_double(const ng::name
     return std::nullopt;
 }
 
-std::optional<std::string> object_xml_deserializer::deserialize_string(const ng::name& name, std::string_view def) const
+std::optional<std::string> object_xml_deserializer::deserialize_string(const ng::string_name& name, std::string_view def) const
 {
     pugi::xml_node next_node = find_property_node(name);
 
@@ -286,7 +286,7 @@ std::optional<std::string> object_xml_deserializer::deserialize_string(const ng:
     }
 }
 
-void object_xml_deserializer::begin_object(const ng::name& name)
+void object_xml_deserializer::begin_object(const ng::string_name& name)
 {
     pugi::xml_node next_node = find_property_node(name);
 
@@ -300,7 +300,7 @@ void object_xml_deserializer::end_object()
     states_.pop_back();
 }
 
-void object_xml_deserializer::begin_array(const ng::name& name)
+void object_xml_deserializer::begin_array(const ng::string_name& name)
 {
     pugi::xml_node next_node = find_property_node(name);
     states_.emplace_back(loading_modes::array, next_node, current_state().version);
@@ -312,7 +312,7 @@ void object_xml_deserializer::end_array()
     states_.pop_back();
 }
 
-void object_xml_deserializer::begin_dictionary(const ng::name& name)
+void object_xml_deserializer::begin_dictionary(const ng::string_name& name)
 {
     pugi::xml_node next_node = find_property_node(name);
     states_.emplace_back(loading_modes::dictionary, next_node, current_state().version);
