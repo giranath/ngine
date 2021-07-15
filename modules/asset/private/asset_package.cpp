@@ -113,22 +113,33 @@ void asset_package::save(std::ostream& stream) const
     }
 }
 
-void asset_package::load(std::istream& stream)
+bool asset_package::try_load(std::istream& stream)
 {
     if(stream)
     {
-        load_header(stream);
+        if(!try_load_header(stream))
+        {
+            return false;
+        }
     }
 
     if(stream)
     {
-        load_entries(stream);
+        if(!try_load_entries(stream))
+        {
+            return false;
+        }
     }
 
     if(stream)
     {
-        load_data(stream);
+        if(!try_load_data(stream))
+        {
+            return false;
+        }
     }
+
+    return true;
 }
 
 void asset_package::save_header(std::ostream& stream) const
@@ -156,7 +167,7 @@ void asset_package::save_header(std::ostream& stream) const
     }
 }
 
-void asset_package::load_header(std::istream& stream)
+bool asset_package::try_load_header(std::istream& stream)
 {
     char magic_header[5] = {0};
 
@@ -164,7 +175,7 @@ void asset_package::load_header(std::istream& stream)
     if(!stream.read(magic_header, 5))
     {
         // Failed to write package header
-        return;
+        return false;
     }
 
     // Now validate that the header is the expected one, otherwise, this stream is not an asset package
@@ -173,15 +184,17 @@ void asset_package::load_header(std::istream& stream)
         // Invalid magic header
         // Notify stream that it is corrupted and we should not continue loading this package
         stream.setstate(std::ios::failbit);
-        return;
+        return false;
     }
 
     // Then read version
     if(!stream.read(reinterpret_cast<char*>(&package_version_), sizeof(package_version_)))
     {
         // Failed to write package version
-        return;
+        return false;
     }
+
+    return true;
 }
 
 void asset_package::save_entries(std::ostream& stream) const
@@ -200,21 +213,27 @@ void asset_package::save_entries(std::ostream& stream) const
     }
 }
 
-void asset_package::load_entries(std::istream& stream)
+bool asset_package::try_load_entries(std::istream& stream)
 {
     // Then write every entries
     uint64_t entries_count = 0;
     if(!stream.read(reinterpret_cast<char*>(&entries_count), sizeof(entries_count)))
     {
         // Failed to write entries count
-        return;
+        return false;
     }
 
     for(uint64_t i = 0; i < entries_count; ++i)
     {
         entries_.emplace_back();
-        load_entry(stream, entries_.back());
+
+        if(!try_load_entry(stream, entries_.back()))
+        {
+            return false;
+        }
     }
+
+    return true;
 }
 
 void asset_package::save_entry(std::ostream& stream, const entry& e) const
@@ -253,37 +272,39 @@ void asset_package::save_entry(std::ostream& stream, const entry& e) const
     }
 }
 
-void asset_package::load_entry(std::istream& stream, entry& e)
+bool asset_package::try_load_entry(std::istream& stream, entry& e)
 {
     if(!load_name(stream, e.name))
     {
         // Failed to load name
-        return;
+        return false;
     }
 
     if(!load_name(stream, e.type))
     {
         // Failed to load type
-        return;
+        return false;
     }
 
     if(!stream.read(reinterpret_cast<char*>(&e.version), sizeof(e.version)))
     {
         // Failed to write asset serialization version
-        return;
+        return false;
     }
 
     if(!stream.read(reinterpret_cast<char*>(&e.size), sizeof(e.size)))
     {
         // Failed to write asset's size
-        return;
+        return false;
     }
 
     if(!stream.read(reinterpret_cast<char*>(&e.offset), sizeof(e.offset)))
     {
         // Failed to write asset's offset
-        return;
+        return false;
     }
+
+    return true;
 }
 
 void asset_package::save_data(std::ostream& stream) const
@@ -302,13 +323,13 @@ void asset_package::save_data(std::ostream& stream) const
     }
 }
 
-void asset_package::load_data(std::istream& stream)
+bool asset_package::try_load_data(std::istream& stream)
 {
     uint64_t data_size = 0;
     if(!stream.read(reinterpret_cast<char*>(&data_size), sizeof(data_size)))
     {
         // Failed to write size of data storage
-        return;
+        return false;
     }
 
     data_.resize(data_size);
@@ -316,8 +337,10 @@ void asset_package::load_data(std::istream& stream)
     if(!stream.read(reinterpret_cast<char*>(data_.data()), data_size))
     {
         // Failed to write data storage
-        return;
+        return false;
     }
+
+    return true;
 }
 
 bool asset_package::contains(const string_name& name) const noexcept

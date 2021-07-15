@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <optional>
 
 namespace ng
 {
@@ -106,18 +107,20 @@ class asset_package
     };
 
     // The registry owning this package
-    asset_registry* owner_;
+    asset_registry* owner_ = nullptr;
 
     // The entries inside the package
-    std::vector<entry> entries_;
+    std::vector<entry> entries_ {};
 
     // The memory address where assets are stored
-    std::vector<uint8_t> data_;
+    std::vector<uint8_t> data_ {};
 
     // The serialization version of the package
-    uint8_t package_version_;
+    uint8_t package_version_ = 0;
 
 public:
+    asset_package() = default;
+
     /**
      * The path to this package
      * @return The path to this package
@@ -134,7 +137,7 @@ public:
      * Load the package from a stream
      * @param stream The stream to load the package from
      */
-    void load(std::istream& stream);
+    bool try_load(std::istream& stream);
 
     /**
      * Check if this package contains a specific asset
@@ -198,16 +201,16 @@ public:
 
 private:
     void save_header(std::ostream& stream) const;
-    void load_header(std::istream& stream);
+    bool try_load_header(std::istream& stream);
 
     void save_entries(std::ostream& stream) const;
-    void load_entries(std::istream& stream);
+    bool try_load_entries(std::istream& stream);
 
     void save_entry(std::ostream& stream, const entry& e) const;
-    void load_entry(std::istream& stream, entry& e);
+    bool try_load_entry(std::istream& stream, entry& e);
 
     void save_data(std::ostream& stream) const;
-    void load_data(std::istream& stream);
+    bool try_load_data(std::istream& stream);
 };
 
 }
