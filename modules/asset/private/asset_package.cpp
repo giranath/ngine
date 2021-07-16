@@ -1,4 +1,5 @@
 #include "asset_package.hpp"
+#include <ng/core/endian.hpp>
 #include <iostream>
 #include <algorithm>
 #include <cassert>
@@ -8,67 +9,117 @@ namespace ng
 
 // TODO: Handle endianess here
 
-asset_view::asset_view(const asset_package* owner, string_name name, string_name type, uint8_t version, const uint8_t* data, uint64_t size)
-: owner_{owner}
-, ptr_{data}
-, name_{std::move(name)}
-, type_{std::move(type)}
-, size_{size}
-, version_{version}
-{
-
-}
-
-const uint8_t* asset_view::begin() const noexcept
-{
-    return ptr_;
-}
-
-const uint8_t* asset_view::end() const noexcept
-{
-    return ptr_ + size_;
-}
-
-bool asset_view::empty() const noexcept
-{
-    return size_ == 0;
-}
-
-std::size_t asset_view::size() const noexcept
-{
-    return size_;
-}
-
-uint8_t asset_view::version() const noexcept
-{
-    return version_;
-}
-
-const string_name& asset_view::name() const noexcept
-{
-    return name_;
-}
-
-const string_name& asset_view::type() const noexcept
-{
-    return type_;
-}
-
-const asset_package* asset_view::package() const noexcept
-{
-    return owner_;
-}
-
 // Asset package starts with the magic header NGPKG
 static const char ASSET_MAGIC_HEADER[] = { 'N', 'G', 'P', 'K', 'G' };
 static const uint8_t CURRENT_PACKAGE_VERSION = 0;
+
+static std::ostream& write_uint(std::ostream& stream, uint8_t value)
+{
+    const uint8_t little_endian_value = little_endian_cast(value);
+    stream.write(reinterpret_cast<const char*>(&little_endian_value), sizeof(little_endian_value));
+
+    return stream;
+}
+
+static std::ostream& write_uint(std::ostream& stream, uint16_t value)
+{
+    const uint16_t little_endian_value = little_endian_cast(value);
+    stream.write(reinterpret_cast<const char*>(&little_endian_value), sizeof(little_endian_value));
+
+    return stream;
+}
+
+static std::ostream& write_uint(std::ostream& stream, uint32_t value)
+{
+    const uint32_t little_endian_value = little_endian_cast(value);
+    stream.write(reinterpret_cast<const char*>(&little_endian_value), sizeof(little_endian_value));
+
+    return stream;
+}
+
+static std::ostream& write_uint(std::ostream& stream, uint64_t value)
+{
+    const uint64_t little_endian_value = little_endian_cast(value);
+    stream.write(reinterpret_cast<const char*>(&little_endian_value), sizeof(little_endian_value));
+
+    return stream;
+}
+
+static std::istream& read_uint(std::istream& stream, uint8_t& out_value)
+{
+    uint8_t little_endian_value;
+    stream.read(reinterpret_cast<char*>(&little_endian_value), sizeof(little_endian_value));
+
+    if constexpr(!is_little_endian)
+    {
+        out_value = big_endian_cast(little_endian_value);
+    }
+    else
+    {
+        out_value = little_endian_value;
+    }
+
+    return stream;
+}
+
+static std::istream& read_uint(std::istream& stream, uint16_t& out_value)
+{
+    uint16_t little_endian_value;
+    stream.read(reinterpret_cast<char*>(&little_endian_value), sizeof(little_endian_value));
+
+    if constexpr(!is_little_endian)
+    {
+        out_value = big_endian_cast(little_endian_value);
+    }
+    else
+    {
+        out_value = little_endian_value;
+    }
+
+    return stream;
+}
+
+static std::istream& read_uint(std::istream& stream, uint32_t& out_value)
+{
+    uint32_t little_endian_value;
+    stream.read(reinterpret_cast<char*>(&little_endian_value), sizeof(little_endian_value));
+
+    if constexpr(!is_little_endian)
+    {
+        out_value = big_endian_cast(little_endian_value);
+    }
+    else
+    {
+        out_value = little_endian_value;
+    }
+
+    return stream;
+}
+
+static std::istream& read_uint(std::istream& stream, uint64_t& out_value)
+{
+    uint64_t little_endian_value;
+    stream.read(reinterpret_cast<char*>(&little_endian_value), sizeof(little_endian_value));
+
+    if constexpr(!is_little_endian)
+    {
+        out_value = big_endian_cast(little_endian_value);
+    }
+    else
+    {
+        out_value = little_endian_value;
+    }
+
+    return stream;
+}
+
 
 static std::ostream& save_name(std::ostream& stream, const string_name& name)
 {
     const char* name_cstr = name.c_str();
     const uint64_t name_length = std::strlen(name_cstr);
 
-    stream.write(reinterpret_cast<const char*>(&name_length), sizeof(name_length));
+    write_uint(stream, name_length);
     stream.write(name_cstr, name_length);
 
     return stream;
@@ -152,7 +203,7 @@ void asset_package::save_header(std::ostream& stream) const
     }
 
     // Then write version
-    if(!stream.write(reinterpret_cast<const char*>(&CURRENT_PACKAGE_VERSION), sizeof(CURRENT_PACKAGE_VERSION)))
+    if(!write_uint(stream, CURRENT_PACKAGE_VERSION))
     {
         // Failed to write package version
         return;
@@ -160,7 +211,7 @@ void asset_package::save_header(std::ostream& stream) const
 
     // Then write every entries
     const uint64_t entries_count = entries_.size();
-    if(!stream.write(reinterpret_cast<const char*>(&entries_count), sizeof(entries_count)))
+    if(!write_uint(stream, entries_count))
     {
         // Failed to write entries count
         return;
@@ -188,7 +239,7 @@ bool asset_package::try_load_header(std::istream& stream)
     }
 
     // Then read version
-    if(!stream.read(reinterpret_cast<char*>(&package_version_), sizeof(package_version_)))
+    if(!read_uint(stream, package_version_))
     {
         // Failed to write package version
         return false;
@@ -201,7 +252,7 @@ void asset_package::save_entries(std::ostream& stream) const
 {
     // Then write every entries
     const uint64_t entries_count = entries_.size();
-    if(!stream.write(reinterpret_cast<const char*>(&entries_count), sizeof(entries_count)))
+    if(!write_uint(stream, entries_count))
     {
         // Failed to write entries count
         return;
@@ -217,7 +268,7 @@ bool asset_package::try_load_entries(std::istream& stream)
 {
     // Then write every entries
     uint64_t entries_count = 0;
-    if(!stream.read(reinterpret_cast<char*>(&entries_count), sizeof(entries_count)))
+    if(!read_uint(stream, entries_count))
     {
         // Failed to write entries count
         return false;
@@ -238,9 +289,6 @@ bool asset_package::try_load_entries(std::istream& stream)
 
 void asset_package::save_entry(std::ostream& stream, const entry& e) const
 {
-    const char* name_cstr = e.name.c_str();
-    const uint64_t name_length = std::strlen(name_cstr);
-
     if(!save_name(stream, e.name))
     {
         // Failed to save name
@@ -253,19 +301,19 @@ void asset_package::save_entry(std::ostream& stream, const entry& e) const
         return;
     }
 
-    if(!stream.write(reinterpret_cast<const char*>(&e.version), sizeof(e.version)))
+    if(!write_uint(stream, e.version))
     {
         // Failed to write asset serialization version
         return;
     }
 
-    if(!stream.write(reinterpret_cast<const char*>(&e.size), sizeof(e.size)))
+    if(!write_uint(stream, e.size))
     {
         // Failed to write asset's size
         return;
     }
 
-    if(!stream.write(reinterpret_cast<const char*>(&e.offset), sizeof(e.offset)))
+    if(!write_uint(stream, e.offset))
     {
         // Failed to write asset's offset
         return;
@@ -286,19 +334,19 @@ bool asset_package::try_load_entry(std::istream& stream, entry& e)
         return false;
     }
 
-    if(!stream.read(reinterpret_cast<char*>(&e.version), sizeof(e.version)))
+    if(!read_uint(stream, e.version))
     {
         // Failed to write asset serialization version
         return false;
     }
 
-    if(!stream.read(reinterpret_cast<char*>(&e.size), sizeof(e.size)))
+    if(!read_uint(stream, e.size))
     {
         // Failed to write asset's size
         return false;
     }
 
-    if(!stream.read(reinterpret_cast<char*>(&e.offset), sizeof(e.offset)))
+    if(!read_uint(stream, e.offset))
     {
         // Failed to write asset's offset
         return false;
@@ -310,7 +358,7 @@ bool asset_package::try_load_entry(std::istream& stream, entry& e)
 void asset_package::save_data(std::ostream& stream) const
 {
     const uint64_t data_size = data_.size();
-    if(!stream.write(reinterpret_cast<const char*>(&data_size), sizeof(data_size)))
+    if(!write_uint(stream, data_size))
     {
         // Failed to write size of data storage
         return;
@@ -326,7 +374,7 @@ void asset_package::save_data(std::ostream& stream) const
 bool asset_package::try_load_data(std::istream& stream)
 {
     uint64_t data_size = 0;
-    if(!stream.read(reinterpret_cast<char*>(&data_size), sizeof(data_size)))
+    if(!read_uint(stream, data_size))
     {
         // Failed to write size of data storage
         return false;

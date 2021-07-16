@@ -4,6 +4,7 @@ add_executable(unit-tests
         core/name.cpp
         core/transform2d.cpp
         core/memory_pool.cpp
+        core/endian.cpp
         deser/xml_loader.cpp
         gameplay/node2d.cpp
         gameplay/node_path.cpp

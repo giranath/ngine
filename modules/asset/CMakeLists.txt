@@ -9,6 +9,8 @@ add_library(asset
         public/ng/asset/asset_package_stream.hpp
         public/ng/asset/asset_factory.hpp
         private/asset_factory.cpp
+        public/ng/asset/asset_view.hpp
+        private/asset_view.cpp
         )
 
 target_include_directories(asset

@@ -8,7 +8,8 @@ add_library(core
         private/name_table.cpp
         public/ng/core/transform2d.hpp
         private/transform2d.cpp
-        public/ng/core/memory_pool.hpp)
+        public/ng/core/memory_pool.hpp
+        public/ng/core/endian.hpp)
 
 target_include_directories(core
         PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/public>
