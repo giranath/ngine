@@ -7,7 +7,10 @@
 namespace ng
 {
 
-// TODO: Handle endianess here
+// A package should always be written to disk using little endian
+// This allows a big endian host to correctly handle an asset package because we know that some endianess conversions are needed
+// on this particular host.
+// At some point, I think it would be better to indicate inside the package which endianness was used when writing the file
 
 // Asset package starts with the magic header NGPKG
 static const char ASSET_MAGIC_HEADER[] = { 'N', 'G', 'P', 'K', 'G' };
